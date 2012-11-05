@@ -1,0 +1,66 @@
+<script>
+  // set opacity on instantiation
+  var shape = new Kinetic.Circle({
+    opacity: 0.5
+  });
+
+  // set opacity after instantiation
+  shape.setOpacity(1);
+</script>
+
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+      canvas {
+        border: 1px solid #9C9898;
+      }
+    </style>
+    <script src="kinetic.js"></script>
+    <script>
+      window.onload = function() {
+        var stage = new Kinetic.Stage({
+          container: "container",
+          width: 578,
+          height: 200
+        });
+        var layer = new Kinetic.Layer();
+
+        var pentagon = new Kinetic.RegularPolygon({
+          x: stage.getWidth() / 2,
+          y: stage.getHeight() / 2,
+          sides: 5,
+          radius: 70,
+          fill: "red",
+          stroke: "black",
+          strokeWidth: 4,
+          opacity: 0.5
+        });
+
+        pentagon.on("mouseover", function() {
+          this.setOpacity(1);
+          layer.draw();
+        });
+
+        pentagon.on("mouseout", function() {
+          this.setOpacity(0.5);
+          layer.draw();
+        });
+
+        // add the shape to the layer
+        layer.add(pentagon);
+
+        // add the layer to the stage
+        stage.add(layer);
+      };
+
+    </script>
+  </head>
+  <body>
+    <div id="container"></div>
+  </body>
+</html>

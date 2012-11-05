@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0px;
+                padding: 0px;
+            }
+            canvas {
+                border: 1px solid #9C9898;
+            }
+        </style>
+        <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.0.1.js"></script>
+        <script>
+            window.onload = function() {
+                layer = new Kinetic.Layer();
+                stage = new Kinetic.Stage({
+                    container: "container",
+                    width: 320,
+                    height: 320
+                });
+
+                background = new Kinetic.Rect({
+                    x: 0,
+                    y: 0,
+                    width: stage.getWidth(),
+                    height: stage.getHeight(),
+                    fill: "white"
+                });
+
+                line = new Kinetic.Line({
+                    points: [0, 0, 50, 50],
+                    stroke: "red"
+                });
+
+                layer.add(background);
+                layer.add(line);
+                stage.add(layer);
+
+                moving = false;
+
+                stage.on("mousedown", function(){
+                    if (moving){
+                        moving = false;layer.draw();
+                    } else {
+                        var mousePos = stage.getMousePosition();
+                        //start point and end point are the same
+                        line.getPoints()[0].x = mousePos.x;
+                        line.getPoints()[0].y = mousePos.y;
+                        line.getPoints()[1].x = mousePos.x;
+                        line.getPoints()[1].y = mousePos.y;
+
+                        moving = true;
+                        layer.drawScene();
+                    }
+
+                });
+
+                stage.on("mousemove", function(){
+                    if (moving) {
+                        var mousePos = stage.getMousePosition();
+                        var x = mousePos.x;
+                        var y = mousePos.y;
+                        line.getPoints()[1].x = mousePos.x;
+                        line.getPoints()[1].y = mousePos.y;
+                        moving = true;
+                        layer.drawScene();
+                    }
+                });
+
+                stage.on("mouseup", function(){
+                    moving = false;
+                });
+
+            };
+        </script>
+    </head>
+    <body>
+        <div id="container" ></div>
+    </body>
+</html>

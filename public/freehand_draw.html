@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+      canvas {
+        border: 1px solid #9C9898;
+      }
+    </style>
+    <script src="jquery.js"></script>
+    <script>
+      function modifyImage(context, imageWidth, imageHeight, startX, startY, mousePosX, mousePosY){
+        var imageData = context.getImageData(startX, startY, imageWidth, imageHeight);
+        var data = imageData.data;
+        var n = parseInt($('#eraser_width').val());        
+        for (var y = mousePosY - n; y < getEndP(mousePosY, n, imageHeight); y++) {
+          for (var x = getStartX(mousePosX, n); x < getEndP(mousePosX, n, imageWidth) ; x++) {
+            pure_date(data, imageWidth, x, y);
+          }
+        }
+        context.putImageData(imageData, startX, startY);
+      }
+
+      function pure_date(data, imageWidth, x, y) {
+        data[((imageWidth * y) + x) * 4] = 0;
+        data[((imageWidth * y) + x) * 4 + 1] = 0;
+        data[((imageWidth * y) + x) * 4 + 2] = 0;
+        data[((imageWidth * y) + x) * 4 + 3] = 0;
+      }
+      
+      function getEndP(mouseP, n, imageS) {
+        var max = mouseP + n - 3;
+        if (max > imageS) {
+          max = imageS;
+        }
+        return max;
+      }
+
+      function getStartX(mouseX, n) {
+        var x = mouseX - n;
+        if (x < 0) {
+          x = 0;
+        }
+        return x;
+      }
+
+      window.onload = function(){
+        var canvas = document.getElementById("myCanvas");
+        var context = canvas.getContext("2d");
+        var imageObj = new Image();
+        var imageWidth, imageHeight, startX, startY;
+        imageObj.onload = function(){
+          imageWidth = imageObj.width;
+          imageHeight = imageObj.height;
+          canvas.width = imageWidth;
+          canvas.height = imageHeight;
+          startX = canvas.width / 2 - imageWidth / 2;
+          startY = canvas.height / 2 - imageHeight / 2;
+          context.drawImage(imageObj, startX, startY);
+        };
+        imageObj.src = "_girls.jpg";
+        canvas.addEventListener('mousedown', function(evt) {
+          drawSo(evt);
+          canvas.addEventListener('mousemove',drawSo, false);
+        }, false);
+
+        canvas.addEventListener('mouseup', function(evt) {
+          canvas.removeEventListener('mousemove', drawSo, false);
+        }, false);
+
+        canvas.addEventListener ("mouseout", function(evt) {
+          canvas.removeEventListener('mousemove', drawSo, false);
+        }, false);
+
+        var drawSo = function(evt) {
+          var mousePos = getMousePos(canvas, evt);
+          $('#x').html(mousePos.x);
+          $('#y').html(mousePos.y);
+          modifyImage(context, imageWidth, imageHeight, startX, startY, mousePos.x - startX, mousePos.y - startY);
+        }
+      };
+      
+      function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect(), root = document.documentElement;
+        var mouseX = evt.clientX - rect.top - root.scrollTop;
+        var mouseY = evt.clientY - rect.left - root.scrollLeft;
+        return {
+          x: mouseX,
+          y: mouseY
+        };
+      }
+    </script>
+  </head>
+  <body>
+  <canvas id="myCanvas"></canvas>
+  <div>
+    x:<span id="x"></span><br>
+    y:<span id="y"></span><br>
+    width of brush:<input id="eraser_width" value="10">
+    <br>
+    Tip: Please dragmove mouse on image and then you will draw.
+  </div>
+</body>
+</html>

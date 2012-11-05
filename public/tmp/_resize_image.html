@@ -1,0 +1,170 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+      canvas {
+        border: 1px solid #9C9898;
+      }
+    </style>
+    <script src="kinetic.js"></script>
+    <script src="jquery.js"></script>
+    <script>
+      function update(group, activeAnchor) {
+        var topLeft = group.get(".topLeft")[0];
+        var topRight = group.get(".topRight")[0];
+        var bottomRight = group.get(".bottomRight")[0];
+        var bottomLeft = group.get(".bottomLeft")[0];
+        var image = group.get(".image")[0];
+
+        // update anchor positions
+        switch (activeAnchor.getName()) {
+          case "topLeft":
+            topRight.attrs.y = activeAnchor.attrs.y;
+            bottomLeft.attrs.x = activeAnchor.attrs.x;
+            image.setPosition(topLeft.attrs.x, topLeft.attrs.y);
+            var width = topRight.attrs.x - topLeft.attrs.x;
+            var height = bottomLeft.attrs.y - topLeft.attrs.y;
+            if(width && height) {
+              image.setSize(width, height);
+            }
+            break;
+          case "topRight":
+            //            topLeft.attrs.y = activeAnchor.attrs.y;
+            bottomRight.attrs.x = activeAnchor.attrs.x;
+            _x = topRight.attrs.x - topLeft.attrs.x;
+            _y = topRight.attrs.y - topLeft.attrs.y;
+            var degree = - Math.atan2(- _y, _x) * 180 / Math.PI;
+            image.setRotationDeg(degree);
+            break;
+        }
+      }
+      function addAnchor(group, x, y, name) {
+        //        var stage = group.getStage();
+        var layer = group.getLayer();
+
+        var anchor = new Kinetic.Circle({
+          x: x,
+          y: y,
+          stroke: "#666",
+          fill: "#ddd",
+          strokeWidth: 2,
+          radius: 8,
+          name: name,
+          draggable: true
+        });
+
+        anchor.on("dragmove", function() {
+          update(group, this);
+          layer.draw();
+        });
+        anchor.on("mousedown touchstart", function() {
+          group.setDraggable(false);
+          this.moveToTop();
+        });
+        anchor.on("dragend", function() {
+          group.setDraggable(true);
+          layer.draw();
+        });
+        // add hover styling
+        anchor.on("mouseover", function() {
+          var layer = this.getLayer();
+          document.body.style.cursor = "pointer";
+          this.setStrokeWidth(3);
+          layer.draw();
+        });
+        anchor.on("mouseout", function() {
+          var layer = this.getLayer();
+          document.body.style.cursor = "default";
+          this.setStrokeWidth(2);
+          layer.draw();
+        });
+
+        group.add(anchor);
+      }
+      function loadImages(sources, callback) {
+        var images = {};
+        var loadedImages = 0;
+        var numImages = 0;
+        for(var src in sources) {
+          numImages++;
+        }
+        for(var src in sources) {
+          images[src] = new Image();
+          images[src].onload = function() {
+            if(++loadedImages >= numImages) {
+              callback(images);
+            }
+          };
+          images[src].src = sources[src];
+        }
+      }
+      function initStage(images) {
+        var stage = new Kinetic.Stage({
+          container: "container",
+          width: 900,
+          height: 700
+        });
+        var yodaGroup = new Kinetic.Group({
+          x: 0,
+          y: 0,
+          draggable: true
+        });
+        var layer = new Kinetic.Layer();
+        layer.add(yodaGroup);
+        stage.add(layer);
+
+        var yodaImg = new Kinetic.Image({
+          x: 0,
+          y: 0,
+          image: images.yoda,
+          width: 213,
+          height: 236,
+          name: "image"
+        });
+
+        yodaGroup.add(yodaImg);
+        addAnchor(yodaGroup, 0, 0, "topLeft");
+        addAnchor(yodaGroup, 213, 0, "topRight");
+        addAnchor(yodaGroup, 213, 236, "bottomRight");
+        addAnchor(yodaGroup, 0, 236, "bottomLeft");
+
+        yodaGroup.on("dragstart", function() {
+          this.moveToTop();
+        });
+
+        stage.draw();
+        
+        // one revolution per 4 seconds
+        //        var angularSpeed = Math.PI / 2;
+        //        var anim = new Kinetic.Animation({
+        //          func: function(frame) {
+        //            var angleDiff = frame.timeDiff * angularSpeed / 1000;
+        //            yodaImg.rotate(angleDiff);
+        //          },
+        //          node: layer
+        //        });
+        //
+        //        anim.start();
+      }
+
+      window.onload = function() {
+        var sources = {
+          yoda: "yoda.jpg"
+        };
+        loadImages(sources, initStage);
+      };
+
+    </script>
+  </head>
+  <body onmousedown="return false;">
+    <div id="container"></div>
+    <div>
+      degree:<span id="degree"></span><br>
+      atan:<span id="math"></span><br>
+    </div>
+  </body>
+</html>
